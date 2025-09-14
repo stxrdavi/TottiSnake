@@ -3,23 +3,706 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Reindirizzamento automatico al file del gioco -->
-    <meta http-equiv="refresh" content="0; url=totti_snake.html">
-    <title>Reindirizzamento</title>
+    <title>Super Totti Snake</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            text-align: center;
             background-color: #1a202c;
             color: #e2e8f0;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 800px;
+        }
+
+        canvas {
+            background-color: #334155;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 15px rgba(0, 0, 0, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            touch-action: none;
+            position: relative;
+        }
+
+        .ui-panel {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            width: 100%;
+            gap: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .secret-code-button {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+        .secret-code-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .ui-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .ui-item span {
+            font-size: 0.875rem;
+            font-weight: 400;
+            opacity: 0.8;
+        }
+
+        .info-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            z-index: 100;
+        }
+
+        .info-box h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .info-box p {
+            margin-bottom: 1.5rem;
+        }
+
+        .info-box button {
+            background-color: #3b82f6;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-weight: 700;
+            cursor: pointer;
+            border: none;
+        }
+
+        .info-box input {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            width: 100%;
+            max-width: 250px;
+        }
+
+        /* Stile per il menu a tendina personalizzato */
+        .custom-select-container {
+            position: relative;
+            user-select: none;
+        }
+
+        .custom-select-trigger {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-width: 180px;
+        }
+
+        .custom-select-options {
+            position: absolute;
+            top: 110%;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 0.5rem;
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .custom-select-options.open {
+            display: flex;
+        }
+
+        .custom-select-option {
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .custom-select-option:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .ui-item-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .countdown-display {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 101;
+            font-size: 8rem;
+            font-weight: 700;
+            color: white;
+            text-shadow: 0 0 10px rgba(0,0,0,0.8);
+            border-radius: 1rem;
+        }
+
+        .game-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            z-index: 50;
+            pointer-events: none;
+            display: none;
+            text-align: center;
+            width: 90%;
         }
     </style>
 </head>
-<body>
-    <p>Se non vieni reindirizzato automaticamente, clicca <a href="totti_snake.html" style="color: #3b82f6;">qui</a> per giocare a Super Totti Snake.</p>
+<body class="bg-gray-900 text-gray-200">
+    <div class="game-container">
+        <h1 class="text-4xl font-bold mb-4">Super Totti Snake</h1>
+        <div class="ui-panel">
+            <div class="ui-item-score">
+                <span class="text-sm">Punteggio</span>
+                <span id="score">0</span>
+            </div>
+            <div class="ui-item-score">
+                <span class="text-sm">Record</span>
+                <span id="highScore">0</span>
+            </div>
+        </div>
+        <button id="secretCodeBtn" class="secret-code-button mt-4">Codici Segreti</button>
+        <canvas id="gameCanvas"></canvas>
+        <div id="gameMessage" class="game-message"></div>
+    </div>
+
+    <!-- Schermata di avvio / Game Over -->
+    <div id="infoBox" class="info-box">
+        <h2 id="infoTitle"></h2>
+        <p id="infoMessage"></p>
+        <div id="controls-container" class="flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div class="custom-select-container">
+                <div class="custom-select-trigger" id="gridSizeTrigger">
+                    <span id="selectedGridText">Griglia grande</span>
+                    <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
+                <div class="custom-select-options" id="gridSizeOptions">
+                    <div class="custom-select-option" data-value="40">Griglia piccola</div>
+                    <div class="custom-select-option" data-value="30">Griglia media</div>
+                    <div class="custom-select-option" data-value="20">Griglia grande</div>
+                </div>
+            </div>
+            <button id="startButton">Inizia il gioco</button>
+        </div>
+    </div>
+
+    <!-- Menu Codici Segreti -->
+    <div id="secretCodeBox" class="info-box" style="display:none;">
+        <h2 id="secretTitle">Codici Segreti</h2>
+        <p id="secretMessage">Inserisci il codice segreto per attivare una modalità speciale.</p>
+        <input type="text" id="secretCodeInput" placeholder="Inserisci codice...">
+        <div class="flex gap-4">
+            <button id="activateCodeBtn">Attiva</button>
+            <button id="closeSecretCodeBtn" class="bg-gray-500">Chiudi</button>
+        </div>
+    </div>
+
+    <!-- Conto alla Rovescia -->
+    <div id="countdownDisplay" class="countdown-display" style="display: none;"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const infoBox = document.getElementById('infoBox');
+        const infoTitle = document.getElementById('infoTitle');
+        const infoMessage = document.getElementById('infoMessage');
+        const startButton = document.getElementById('startButton');
+        const scoreElement = document.getElementById('score');
+        const highScoreElement = document.getElementById('highScore');
+        const gridSizeTrigger = document.getElementById('gridSizeTrigger');
+        const gridSizeOptions = document.getElementById('gridSizeOptions');
+        const selectedGridText = document.getElementById('selectedGridText');
+        const secretCodeBtn = document.getElementById('secretCodeBtn');
+        const secretCodeBox = document.getElementById('secretCodeBox');
+        const secretCodeInput = document.getElementById('secretCodeInput');
+        const activateCodeBtn = document.getElementById('activateCodeBtn');
+        const closeSecretCodeBtn = document.getElementById('closeSecretCodeBtn');
+        const countdownDisplay = document.getElementById('countdownDisplay');
+        const gameMessage = document.getElementById('gameMessage');
+
+        let GRID_SIZE = 20;
+        let GAME_SPEED = 120;
+        const NORMAL_GAME_SPEED = 120;
+        const FAST_GAME_SPEED = 50;
+        let snake, food, score, direction;
+        let isGameOver = false;
+        let gameLoopInterval;
+        let countdownInterval;
+        let highScore = 0;
+        let rainbowMode = false;
+        let hugeGridMode = false;
+        let drawMode = false;
+        const WSPEED_CODE = 'wspeed';
+        const SKIBIDI_CODE = 'skibidi';
+        const PORCODDIO_CODE = 'porcoddio';
+        const DRAW_CODE = 'draw';
+
+        // Firebase Config
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+        const firebaseConfig = JSON.parse(__firebase_config);
+        const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+
+        let db, auth, userId;
+
+        const tottiHeadImage = new Image();
+        tottiHeadImage.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLr9-AaKVL09nTfusoKHWvJRyKRjeOh9v1YQ&s';
+
+        const tottiBodyImages = [
+            new Image(), new Image(), new Image(), new Image(), new Image()
+        ];
+        const bodyImageUrls = [
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0N-X1x9O-D2Jg5O5Yp-Yy-d6S8Z1Jt-7MhA&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLJz4lP-C1y-j8v9P1T5v-t8m_1_Yp-m-8w&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJ6u-tGgWz1QzW7w8Y6O7N0V-n8sX1d7l5Q&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-v7vV-q1x-d7d5Qz8n2y-b5d6Q-Y8z0d-w&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9XJvN7fC-Yp7w7y8j-5j4f5h7S6s-J0yW3A&s'
+        ];
+        tottiBodyImages.forEach((img, index) => {
+            img.src = bodyImageUrls[index];
+        });
+
+        const rainbowColors = ['#ff0000', '#ff7f00', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#9400d3'];
+
+        async function initFirebaseAndAuth() {
+            try {
+                const app = initializeApp(firebaseConfig);
+                db = getFirestore(app);
+                auth = getAuth(app);
+                if (initialAuthToken) {
+                    await signInWithCustomToken(auth, initialAuthToken);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                userId = auth.currentUser.uid;
+                await fetchHighScore();
+            } catch (error) {
+                console.error("Firebase Auth error:", error);
+            }
+        }
+
+        async function fetchHighScore() {
+            if (!userId) return;
+            const scoreDocRef = doc(db, `artifacts/${appId}/users/${userId}/totti_snake_scores`, 'high_score');
+            try {
+                const scoreDoc = await getDoc(scoreDocRef);
+                if (scoreDoc.exists()) {
+                    highScore = scoreDoc.data().score;
+                } else {
+                    highScore = 0;
+                }
+                updateHighScoreUI();
+            } catch (error) {
+                console.error("Error fetching high score:", error);
+            }
+        }
+
+        async function saveHighScore(newScore) {
+            if (!userId) return;
+            if (newScore > highScore) {
+                const scoreDocRef = doc(db, `artifacts/${appId}/users/${userId}/totti_snake_scores`, 'high_score');
+                try {
+                    await setDoc(scoreDocRef, { score: newScore });
+                    highScore = newScore;
+                    updateHighScoreUI();
+                } catch (error) {
+                    console.error("Error saving high score:", error);
+                }
+            }
+        }
+
+        function updateHighScoreUI() {
+            highScoreElement.innerText = highScore;
+        }
+
+        function showStartScreen() {
+            infoTitle.innerText = "Benvenuto in Super Totti Snake!";
+            infoMessage.innerText = "Scegli la dimensione della griglia e inizia a giocare.";
+            infoBox.style.display = 'block';
+            secretCodeBtn.style.display = 'block';
+            startButton.innerText = 'Inizia il gioco';
+        }
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth > 800 ? 800 : window.innerWidth * 0.9;
+            canvas.height = canvas.width * 0.6;
+        }
+
+        function startGame() {
+            snake = [{ x: 10, y: 10, img: tottiHeadImage }];
+            direction = 'right';
+            score = 0;
+            isGameOver = false;
+            rainbowMode = false;
+            hugeGridMode = false;
+            drawMode = false;
+            GAME_SPEED = NORMAL_GAME_SPEED;
+            updateScore();
+            generateFood();
+            infoBox.style.display = 'none';
+            secretCodeBox.style.display = 'none';
+            if (gameLoopInterval) {
+                clearInterval(gameLoopInterval);
+            }
+            gameLoopInterval = setInterval(gameLoop, GAME_SPEED);
+        }
+
+        function generateFood() {
+            food = {
+                x: Math.floor(Math.random() * (canvas.width / GRID_SIZE)),
+                y: Math.floor(Math.random() * (canvas.height / GRID_SIZE))
+            };
+        }
+
+        function gameLoop() {
+            if (isGameOver) {
+                clearInterval(gameLoopInterval);
+                return;
+            }
+
+            update();
+            draw();
+        }
+
+        function update() {
+            const head = { x: snake[0].x, y: snake[0].y, img: tottiHeadImage };
+
+            switch (direction) {
+                case 'up': head.y--; break;
+                case 'down': head.y++; break;
+                case 'left': head.x--; break;
+                case 'right': head.x++; break;
+            }
+
+            let reason = '';
+            let collision = false;
+
+            if (rainbowMode) {
+                if (head.x * GRID_SIZE >= canvas.width) head.x = 0;
+                else if (head.x < 0) head.x = canvas.width / GRID_SIZE - 1;
+                if (head.y * GRID_SIZE >= canvas.height) head.y = 0;
+                else if (head.y < 0) head.y = canvas.height / GRID_SIZE - 1;
+            } else {
+                if (head.x < 0 || head.x * GRID_SIZE >= canvas.width) {
+                    collision = true;
+                    reason = 'Hai sbattuto contro il muro!';
+                }
+                if (head.y < 0 || head.y * GRID_SIZE >= canvas.height) {
+                    collision = true;
+                    reason = 'Hai sbattuto contro il muro!';
+                }
+            }
+
+            if (checkCollision(head)) {
+                collision = true;
+                reason = 'Hai morso la coda!';
+            }
+
+            if (collision) {
+                isGameOver = true;
+                showGameOver(reason);
+                return;
+            }
+
+            snake.unshift(head);
+
+            if (head.x === food.x && head.y === food.y) {
+                score += 10;
+                updateScore();
+                generateFood();
+
+                if (!rainbowMode && snake.length > 1) {
+                    const randomImageIndex = Math.floor(Math.random() * tottiBodyImages.length);
+                    snake[1].img = tottiBodyImages[randomImageIndex];
+                }
+            } else if (!drawMode) {
+                snake.pop();
+            }
+        }
+
+        function draw() {
+            if (!drawMode) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+
+            ctx.fillStyle = '#fde047';
+            ctx.beginPath();
+            ctx.arc(food.x * GRID_SIZE + GRID_SIZE / 2, food.y * GRID_SIZE + GRID_SIZE / 2, GRID_SIZE / 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            snake.forEach((segment, index) => {
+                if (rainbowMode && index > 0) {
+                    ctx.fillStyle = rainbowColors[index % rainbowColors.length];
+                    ctx.fillRect(segment.x * GRID_SIZE, segment.y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
+                } else {
+                    ctx.drawImage(segment.img, segment.x * GRID_SIZE, segment.y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
+                }
+            });
+        }
+
+        function showTemporaryMessage(message) {
+            gameMessage.innerText = message;
+            gameMessage.style.display = 'block';
+            setTimeout(() => {
+                gameMessage.style.display = 'none';
+            }, 3000);
+        }
+
+        function checkCollision(head) {
+            for (let i = 1; i < snake.length; i++) {
+                if (head.x === snake[i].x && head.y === snake[i].y) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        function updateScore() {
+            scoreElement.innerText = score;
+        }
+
+        function showGameOver(reason) {
+            infoTitle.innerText = "Game Over";
+            infoMessage.innerText = `${reason} Il tuo punteggio è: ${score}. Vuoi riprovare?`;
+            infoBox.style.display = 'block';
+            startButton.innerText = 'Ricomincia';
+            saveHighScore(score);
+        }
+
+        function resumeGame() {
+            let countdown = 3;
+            countdownDisplay.innerText = countdown;
+            countdownDisplay.style.display = 'flex';
+
+            countdownInterval = setInterval(() => {
+                countdown--;
+                if (countdown > 0) {
+                    countdownDisplay.innerText = countdown;
+                } else {
+                    clearInterval(countdownInterval);
+                    countdownDisplay.style.display = 'none';
+                    if (gameLoopInterval) {
+                        clearInterval(gameLoopInterval);
+                    }
+                    gameLoopInterval = setInterval(gameLoop, GAME_SPEED);
+                }
+            }, 1000);
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (document.activeElement === secretCodeInput) {
+                return;
+            }
+
+            const key = e.key.toLowerCase();
+            if (['w', 'a', 's', 'd'].includes(key)) {
+                e.preventDefault();
+                switch (key) {
+                    case 'w': if (direction !== 'down') direction = 'up'; break;
+                    case 'a': if (direction !== 'right') direction = 'left'; break;
+                    case 's': if (direction !== 'up') direction = 'down'; break;
+                    case 'd': if (direction !== 'left') direction = 'right'; break;
+                }
+            }
+        });
+
+        startButton.addEventListener('click', () => {
+            if (!isGameOver) {
+                startGame();
+            } else {
+                location.reload();
+            }
+        });
+
+        // Custom dropdown logic
+        gridSizeTrigger.addEventListener('click', () => {
+            gridSizeOptions.classList.toggle('open');
+        });
+
+        document.querySelectorAll('.custom-select-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const value = option.getAttribute('data-value');
+                const text = option.innerText;
+                selectedGridText.innerText = text;
+                GRID_SIZE = parseInt(value);
+                gridSizeOptions.classList.remove('open');
+            });
+        });
+
+        // Secret code menu logic
+        secretCodeBtn.addEventListener('click', () => {
+            infoBox.style.display = 'none';
+            secretCodeBox.style.display = 'block';
+            secretCodeInput.focus();
+
+            if (!isGameOver && gameLoopInterval) {
+                clearInterval(gameLoopInterval);
+                gameLoopInterval = null;
+            }
+        });
+
+        closeSecretCodeBtn.addEventListener('click', () => {
+            secretCodeBox.style.display = 'none';
+            if (!isGameOver) {
+                resumeGame();
+            } else {
+                infoBox.style.display = 'block';
+            }
+        });
+
+        activateCodeBtn.addEventListener('click', () => {
+            const code = secretCodeInput.value.toLowerCase();
+            if (code === WSPEED_CODE) {
+                if (!rainbowMode) {
+                    rainbowMode = true;
+                    GAME_SPEED = FAST_GAME_SPEED;
+                    if (gameLoopInterval) {
+                        clearInterval(gameLoopInterval);
+                    }
+                    gameLoopInterval = setInterval(gameLoop, GAME_SPEED);
+                    secretCodeBox.style.display = 'none';
+                    showTemporaryMessage("Modalità 'WSPEED' attivata!");
+                }
+            } else if (code === SKIBIDI_CODE) {
+                if (!hugeGridMode) {
+                    hugeGridMode = true;
+                    GRID_SIZE = 10;
+                    resizeCanvas();
+                    startGame();
+                    secretCodeBox.style.display = 'none';
+                    showTemporaryMessage("Modalità 'SKIBIDI' attivata!");
+                }
+            } else if (code === PORCODDIO_CODE) {
+                if (!hugeGridMode) {
+                    score = 9999;
+                    updateScore();
+                    GRID_SIZE = 5;
+                    hugeGridMode = true;
+                    resizeCanvas();
+
+                    const snakeLength = 50;
+                    snake = [];
+                    direction = 'right';
+                    snake.push({ x: 50, y: 50, img: tottiHeadImage });
+                    for (let i = 1; i < snakeLength; i++) {
+                        snake.push({ x: 50 - i, y: 50, img: tottiBodyImages[Math.floor(Math.random() * tottiBodyImages.length)] });
+                    }
+
+                    generateFood();
+
+                    secretCodeBox.style.display = 'none';
+                    showTemporaryMessage("Modalità 'PORCODDIO' attivata! Punteggio al massimo, serpente lunghissimo e griglia gigantesca!");
+
+                    if (gameLoopInterval) {
+                        clearInterval(gameLoopInterval);
+                    }
+                    gameLoopInterval = setInterval(gameLoop, GAME_SPEED);
+                }
+            } else if (code === DRAW_CODE) {
+                 if (!drawMode) {
+                    drawMode = true;
+                    secretCodeBox.style.display = 'none';
+                    showTemporaryMessage("Modalità 'DRAW' attivata! Il serpente ora disegna.");
+                    resumeGame();
+                 } else {
+                    secretCodeInput.value = '';
+                    secretCodeInput.placeholder = "Modalità 'DRAW' già attiva!";
+                 }
+            } else {
+                secretCodeInput.value = '';
+                secretCodeInput.placeholder = "Codice errato!";
+            }
+        });
+
+        window.onload = function() {
+            resizeCanvas();
+            showStartScreen();
+            initFirebaseAndAuth();
+        };
+
+    </script>
 </body>
 </html>
