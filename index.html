@@ -21,7 +21,6 @@
             padding: 20px;
             overflow-y: auto;
         }
-
         .game-container {
             display: flex;
             flex-direction: column;
@@ -30,7 +29,6 @@
             width: 100%;
             max-width: 800px;
         }
-
         canvas {
             background-color: #334155;
             border-radius: 1rem;
@@ -39,7 +37,6 @@
             touch-action: none;
             position: relative;
         }
-
         .ui-panel {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -54,7 +51,6 @@
             gap: 1rem;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1), 0 10px 15px rgba(0, 0, 0, 0.1);
         }
-
         .secret-code-button {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -69,7 +65,6 @@
         .secret-code-button:hover {
             background: rgba(255, 255, 255, 0.2);
         }
-
         .ui-item {
             display: flex;
             flex-direction: column;
@@ -78,13 +73,11 @@
             font-weight: 700;
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
         }
-
         .ui-item span {
             font-size: 0.875rem;
             font-weight: 400;
             opacity: 0.8;
         }
-
         .info-box {
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
@@ -100,17 +93,14 @@
             display: none;
             z-index: 100;
         }
-
         .info-box h2 {
             font-size: 1.5rem;
             font-weight: 700;
             margin-bottom: 0.5rem;
         }
-
         .info-box p {
             margin-bottom: 1.5rem;
         }
-
         .info-box button {
             background-color: #3b82f6;
             color: white;
@@ -120,7 +110,6 @@
             cursor: pointer;
             border: none;
         }
-
         .info-box input {
             background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(5px);
@@ -133,13 +122,10 @@
             width: 100%;
             max-width: 250px;
         }
-
-        /* Stile per il menu a tendina personalizzato */
         .custom-select-container {
             position: relative;
             user-select: none;
         }
-
         .custom-select-trigger {
             background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(5px);
@@ -154,7 +140,6 @@
             justify-content: space-between;
             min-width: 180px;
         }
-
         .custom-select-options {
             position: absolute;
             top: 110%;
@@ -170,27 +155,22 @@
             flex-direction: column;
             overflow: hidden;
         }
-
         .custom-select-options.open {
             display: flex;
         }
-
         .custom-select-option {
             padding: 0.75rem 1rem;
             cursor: pointer;
             transition: background-color 0.2s;
         }
-
         .custom-select-option:hover {
             background-color: rgba(255, 255, 255, 0.1);
         }
-
         .ui-item-score {
             display: flex;
             flex-direction: column;
             align-items: center;
         }
-
         .countdown-display {
             position: absolute;
             top: 0;
@@ -208,7 +188,6 @@
             text-shadow: 0 0 10px rgba(0,0,0,0.8);
             border-radius: 1rem;
         }
-
         .game-message {
             position: absolute;
             top: 50%;
@@ -285,6 +264,7 @@
         import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
+        // Constants and DOM elements
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         const infoBox = document.getElementById('infoBox');
@@ -308,7 +288,7 @@
         let GAME_SPEED = 120;
         const NORMAL_GAME_SPEED = 120;
         const FAST_GAME_SPEED = 50;
-        let snake, food, score, direction;
+        let snake, foodPellets, score, direction;
         let isGameOver = false;
         let gameLoopInterval;
         let countdownInterval;
@@ -316,36 +296,21 @@
         let rainbowMode = false;
         let hugeGridMode = false;
         let drawMode = false;
+        let infiniteMode = false;
+        let gnamMode = false;
         const WSPEED_CODE = 'wspeed';
         const SKIBIDI_CODE = 'skibidi';
         const PORCODDIO_CODE = 'porcoddio';
         const DRAW_CODE = 'draw';
+        const ROBERTO_CODE = 'roberto';
+        const GNAM_CODE = 'gnam';
 
-        // Firebase Config
+        // Firebase Config and Initialization
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = JSON.parse(__firebase_config);
         const initialAuthToken = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
 
         let db, auth, userId;
-
-        const tottiHeadImage = new Image();
-        tottiHeadImage.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLr9-AaKVL09nTfusoKHWvJRyKRjeOh9v1YQ&s';
-
-        const tottiBodyImages = [
-            new Image(), new Image(), new Image(), new Image(), new Image()
-        ];
-        const bodyImageUrls = [
-            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0N-X1x9O-D2Jg5O5Yp-Yy-d6S8Z1Jt-7MhA&s',
-            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLJz4lP-C1y-j8v9P1T5v-t8m_1_Yp-m-8w&s',
-            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJ6u-tGgWz1QzW7w8Y6O7N0V-n8sX1d7l5Q&s',
-            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-v7vV-q1x-d7d5Qz8n2y-b5d6Q-Y8z0d-w&s',
-            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9XJvN7fC-Yp7w7y8j-5j4f5h7S6s-J0yW3A&s'
-        ];
-        tottiBodyImages.forEach((img, index) => {
-            img.src = bodyImageUrls[index];
-        });
-
-        const rainbowColors = ['#ff0000', '#ff7f00', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#9400d3'];
 
         async function initFirebaseAndAuth() {
             try {
@@ -394,6 +359,27 @@
             }
         }
 
+        // Game Assets (Images)
+        const tottiHeadImage = new Image();
+        tottiHeadImage.src = 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLr9-AaKVL09nTfusoKHWvJRyKRjeOh9v1YQ&s';
+
+        const tottiBodyImages = [
+            new Image(), new Image(), new Image(), new Image(), new Image()
+        ];
+        const bodyImageUrls = [
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR0N-X1x9O-D2Jg5O5Yp-Yy-d6S8Z1Jt-7MhA&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSLJz4lP-C1y-j8v9P1T5v-t8m_1_Yp-m-8w&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQJ6u-tGgWz1QzW7w8Y6O7N0V-n8sX1d7l5Q&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcS-v7vV-q1x-d7d5Qz8n2y-b5d6Q-Y8z0d-w&s',
+            'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR9XJvN7fC-Yp7w7y8j-5j4f5h7S6s-J0yW3A&s'
+        ];
+        tottiBodyImages.forEach((img, index) => {
+            img.src = bodyImageUrls[index];
+        });
+
+        const rainbowColors = ['#ff0000', '#ff7f00', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#9400d3'];
+
+        // UI and Game State Management
         function updateHighScoreUI() {
             highScoreElement.innerText = highScore;
         }
@@ -413,17 +399,41 @@
 
         function startGame() {
             snake = [{ x: 10, y: 10, img: tottiHeadImage }];
+            foodPellets = [];
             direction = 'right';
             score = 0;
             isGameOver = false;
-            rainbowMode = false;
-            hugeGridMode = false;
-            drawMode = false;
-            GAME_SPEED = NORMAL_GAME_SPEED;
+            gnamMode = false;
+            
             updateScore();
             generateFood();
             infoBox.style.display = 'none';
             secretCodeBox.style.display = 'none';
+            
+            if (gameLoopInterval) {
+                clearInterval(gameLoopInterval);
+            }
+            gameLoopInterval = setInterval(gameLoop, GAME_SPEED);
+        }
+
+        function restartGame() {
+            snake = [{ x: 10, y: 10, img: tottiHeadImage }];
+            foodPellets = [];
+            direction = 'right';
+            score = 0;
+            isGameOver = false;
+            
+            // Check if gnamMode was activated, if so, re-activate it.
+            if (gnamMode) {
+                 generateAllFood();
+            } else {
+                 generateFood();
+            }
+
+            updateScore();
+            infoBox.style.display = 'none';
+            secretCodeBox.style.display = 'none';
+            
             if (gameLoopInterval) {
                 clearInterval(gameLoopInterval);
             }
@@ -431,10 +441,34 @@
         }
 
         function generateFood() {
-            food = {
-                x: Math.floor(Math.random() * (canvas.width / GRID_SIZE)),
-                y: Math.floor(Math.random() * (canvas.height / GRID_SIZE))
-            };
+            const gridSizeX = Math.floor(canvas.width / GRID_SIZE);
+            const gridSizeY = Math.floor(canvas.height / GRID_SIZE);
+            let newFood;
+            do {
+                newFood = {
+                    x: Math.floor(Math.random() * gridSizeX),
+                    y: Math.floor(Math.random() * gridSizeY)
+                };
+            } while (isSnakeOnFood(newFood) || foodPellets.some(p => p.x === newFood.x && p.y === newFood.y));
+            foodPellets.push(newFood);
+        }
+
+        function generateAllFood() {
+            foodPellets = [];
+            const gridSizeX = Math.floor(canvas.width / GRID_SIZE);
+            const gridSizeY = Math.floor(canvas.height / GRID_SIZE);
+            for (let x = 0; x < gridSizeX; x++) {
+                for (let y = 0; y < gridSizeY; y++) {
+                    const pellet = { x, y };
+                    if (!isSnakeOnFood(pellet)) {
+                        foodPellets.push(pellet);
+                    }
+                }
+            }
+        }
+
+        function isSnakeOnFood(pellet) {
+             return snake.some(segment => segment.x === pellet.x && segment.y === pellet.y);
         }
 
         function gameLoop() {
@@ -442,7 +476,6 @@
                 clearInterval(gameLoopInterval);
                 return;
             }
-
             update();
             draw();
         }
@@ -460,12 +493,13 @@
             let reason = '';
             let collision = false;
 
+            // Handle boundary collisions based on active modes
             if (rainbowMode) {
                 if (head.x * GRID_SIZE >= canvas.width) head.x = 0;
                 else if (head.x < 0) head.x = canvas.width / GRID_SIZE - 1;
                 if (head.y * GRID_SIZE >= canvas.height) head.y = 0;
                 else if (head.y < 0) head.y = canvas.height / GRID_SIZE - 1;
-            } else {
+            } else if (!infiniteMode) {
                 if (head.x < 0 || head.x * GRID_SIZE >= canvas.width) {
                     collision = true;
                     reason = 'Hai sbattuto contro il muro!';
@@ -475,7 +509,8 @@
                     reason = 'Hai sbattuto contro il muro!';
                 }
             }
-
+            
+            // Check for self-collision
             if (checkCollision(head)) {
                 collision = true;
                 reason = 'Hai morso la coda!';
@@ -486,13 +521,20 @@
                 showGameOver(reason);
                 return;
             }
-
+            
             snake.unshift(head);
 
-            if (head.x === food.x && head.y === food.y) {
+            // Check if the snake has eaten a food pellet
+            const pelletIndex = foodPellets.findIndex(pellet => head.x === pellet.x && head.y === pellet.y);
+            if (pelletIndex !== -1) {
                 score += 10;
                 updateScore();
-                generateFood();
+                foodPellets.splice(pelletIndex, 1);
+                if (foodPellets.length === 0 && gnamMode) {
+                     showTemporaryMessage("Griglia svuotata! Prova un altro codice.");
+                } else if (!gnamMode) {
+                    generateFood();
+                }
 
                 if (!rainbowMode && snake.length > 1) {
                     const randomImageIndex = Math.floor(Math.random() * tottiBodyImages.length);
@@ -508,11 +550,21 @@
                 ctx.clearRect(0, 0, canvas.width, canvas.height);
             }
 
-            ctx.fillStyle = '#fde047';
-            ctx.beginPath();
-            ctx.arc(food.x * GRID_SIZE + GRID_SIZE / 2, food.y * GRID_SIZE + GRID_SIZE / 2, GRID_SIZE / 2, 0, Math.PI * 2);
-            ctx.fill();
+            if (infiniteMode) {
+                // Center the drawing on the snake's head
+                ctx.save();
+                ctx.translate(canvas.width / 2 - snake[0].x * GRID_SIZE - GRID_SIZE / 2, canvas.height / 2 - snake[0].y * GRID_SIZE - GRID_SIZE / 2);
+            }
 
+            // Draw food
+            ctx.fillStyle = '#fde047';
+            foodPellets.forEach(pellet => {
+                ctx.beginPath();
+                ctx.arc(pellet.x * GRID_SIZE + GRID_SIZE / 2, pellet.y * GRID_SIZE + GRID_SIZE / 2, GRID_SIZE / 2, 0, Math.PI * 2);
+                ctx.fill();
+            });
+
+            // Draw snake
             snake.forEach((segment, index) => {
                 if (rainbowMode && index > 0) {
                     ctx.fillStyle = rainbowColors[index % rainbowColors.length];
@@ -521,6 +573,10 @@
                     ctx.drawImage(segment.img, segment.x * GRID_SIZE, segment.y * GRID_SIZE, GRID_SIZE, GRID_SIZE);
                 }
             });
+
+            if (infiniteMode) {
+                ctx.restore();
+            }
         }
 
         function showTemporaryMessage(message) {
@@ -556,7 +612,9 @@
             let countdown = 3;
             countdownDisplay.innerText = countdown;
             countdownDisplay.style.display = 'flex';
-
+            if (gameLoopInterval) {
+                clearInterval(gameLoopInterval);
+            }
             countdownInterval = setInterval(() => {
                 countdown--;
                 if (countdown > 0) {
@@ -564,19 +622,16 @@
                 } else {
                     clearInterval(countdownInterval);
                     countdownDisplay.style.display = 'none';
-                    if (gameLoopInterval) {
-                        clearInterval(gameLoopInterval);
-                    }
                     gameLoopInterval = setInterval(gameLoop, GAME_SPEED);
                 }
             }, 1000);
         }
 
+        // Event Listeners
         window.addEventListener('keydown', (e) => {
             if (document.activeElement === secretCodeInput) {
                 return;
             }
-
             const key = e.key.toLowerCase();
             if (['w', 'a', 's', 'd'].includes(key)) {
                 e.preventDefault();
@@ -593,11 +648,10 @@
             if (!isGameOver) {
                 startGame();
             } else {
-                location.reload();
+                restartGame();
             }
         });
 
-        // Custom dropdown logic
         gridSizeTrigger.addEventListener('click', () => {
             gridSizeOptions.classList.toggle('open');
         });
@@ -612,12 +666,10 @@
             });
         });
 
-        // Secret code menu logic
         secretCodeBtn.addEventListener('click', () => {
             infoBox.style.display = 'none';
             secretCodeBox.style.display = 'block';
             secretCodeInput.focus();
-
             if (!isGameOver && gameLoopInterval) {
                 clearInterval(gameLoopInterval);
                 gameLoopInterval = null;
@@ -635,74 +687,68 @@
 
         activateCodeBtn.addEventListener('click', () => {
             const code = secretCodeInput.value.toLowerCase();
-            if (code === WSPEED_CODE) {
-                if (!rainbowMode) {
-                    rainbowMode = true;
-                    GAME_SPEED = FAST_GAME_SPEED;
-                    if (gameLoopInterval) {
-                        clearInterval(gameLoopInterval);
-                    }
-                    gameLoopInterval = setInterval(gameLoop, GAME_SPEED);
-                    secretCodeBox.style.display = 'none';
-                    showTemporaryMessage("Modalità 'WSPEED' attivata!");
+            let codeActivated = false;
+
+            if (code === WSPEED_CODE && !rainbowMode) {
+                rainbowMode = true;
+                GAME_SPEED = FAST_GAME_SPEED;
+                codeActivated = true;
+            }
+            if (code === SKIBIDI_CODE && !hugeGridMode) {
+                hugeGridMode = true;
+                GRID_SIZE = 10;
+                resizeCanvas();
+                codeActivated = true;
+            }
+            if (code === PORCODDIO_CODE && !hugeGridMode) {
+                score = 9999;
+                updateScore();
+                GRID_SIZE = 5;
+                hugeGridMode = true;
+                resizeCanvas();
+                const snakeLength = 50;
+                snake = [];
+                direction = 'right';
+                snake.push({ x: 50, y: 50, img: tottiHeadImage });
+                for (let i = 1; i < snakeLength; i++) {
+                    snake.push({ x: 50 - i, y: 50, img: tottiBodyImages[Math.floor(Math.random() * tottiBodyImages.length)] });
                 }
-            } else if (code === SKIBIDI_CODE) {
-                if (!hugeGridMode) {
-                    hugeGridMode = true;
-                    GRID_SIZE = 10;
-                    resizeCanvas();
-                    startGame();
-                    secretCodeBox.style.display = 'none';
-                    showTemporaryMessage("Modalità 'SKIBIDI' attivata!");
+                generateFood();
+                codeActivated = true;
+            }
+            if (code === DRAW_CODE && !drawMode) {
+                 drawMode = true;
+                 codeActivated = true;
+            }
+            if (code === ROBERTO_CODE && !infiniteMode) {
+                 infiniteMode = true;
+                 codeActivated = true;
+            }
+            if (code === GNAM_CODE && !gnamMode) {
+                 gnamMode = true;
+                 generateAllFood();
+                 codeActivated = true;
+            }
+
+            if (codeActivated) {
+                secretCodeBox.style.display = 'none';
+                showTemporaryMessage(`Codice '${code}' attivato!`);
+                if (gameLoopInterval) {
+                    clearInterval(gameLoopInterval);
                 }
-            } else if (code === PORCODDIO_CODE) {
-                if (!hugeGridMode) {
-                    score = 9999;
-                    updateScore();
-                    GRID_SIZE = 5;
-                    hugeGridMode = true;
-                    resizeCanvas();
-
-                    const snakeLength = 50;
-                    snake = [];
-                    direction = 'right';
-                    snake.push({ x: 50, y: 50, img: tottiHeadImage });
-                    for (let i = 1; i < snakeLength; i++) {
-                        snake.push({ x: 50 - i, y: 50, img: tottiBodyImages[Math.floor(Math.random() * tottiBodyImages.length)] });
-                    }
-
-                    generateFood();
-
-                    secretCodeBox.style.display = 'none';
-                    showTemporaryMessage("Modalità 'PORCODDIO' attivata! Punteggio al massimo, serpente lunghissimo e griglia gigantesca!");
-
-                    if (gameLoopInterval) {
-                        clearInterval(gameLoopInterval);
-                    }
-                    gameLoopInterval = setInterval(gameLoop, GAME_SPEED);
-                }
-            } else if (code === DRAW_CODE) {
-                 if (!drawMode) {
-                    drawMode = true;
-                    secretCodeBox.style.display = 'none';
-                    showTemporaryMessage("Modalità 'DRAW' attivata! Il serpente ora disegna.");
-                    resumeGame();
-                 } else {
-                    secretCodeInput.value = '';
-                    secretCodeInput.placeholder = "Modalità 'DRAW' già attiva!";
-                 }
+                gameLoopInterval = setInterval(gameLoop, GAME_SPEED);
             } else {
                 secretCodeInput.value = '';
                 secretCodeInput.placeholder = "Codice errato!";
             }
         });
-
+        
+        // Initial setup on window load
         window.onload = function() {
             resizeCanvas();
             showStartScreen();
             initFirebaseAndAuth();
         };
-
     </script>
 </body>
 </html>
